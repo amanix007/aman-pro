@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-scroll`}>
-        <div className="grid [grid-template-columns:1fr_minmax(auto,240px)_min(800px,100%)_1fr] gap-x-8 py-8">
+        <div className="grid [grid-template-columns:1fr_minmax(auto,240px)_min(1000px,100%)_1fr] gap-x-8 py-8">
           {/* Sidebar */}
           <div className="col-start-2">
             <GlobalNav />
