@@ -1,0 +1,321 @@
+
+# Call, Apply, and Bind Methods in JavaScript
+
+In JavaScript, we have three methods called  `call()`,  `apply()`, and  `bind()`  that are used for function invocation. These methods allow us to invoke functions with different contexts, which is useful when working with objects and inheritance. In this article, we will explain the differences between these methods and how they can be used in our code.
+
+## Call Method
+
+The  `call()`  method is used to call a function with a specific context. It takes two arguments: the first argument is the context object, which is what  `this`  will refer to inside the function, and the second argument is an array of arguments that will be passed to the function as parameters.
+
+Here's an example of how we can use the  `call()`  method:
+
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}`);
+}
+
+// Call the `greet` function with a specific context
+greet.call({ name: "John" }, ["John"]);
+
+```
+
+In this example, we are calling the  `greet`  function with a specific context object, which is an object that has a property called  `name`  set to  `"John"`. The  `greet`  function will log the message "Hello, John".
+
+## Apply Method
+
+The  `apply()`  method is similar to the  `call()`  method, but it takes an array of arguments instead of a list of parameters. This means that we can pass in an array of values as arguments to the function.
+
+Here's an example of how we can use the  `apply()`  method:
+
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}`);
+}
+
+// Call the `greet` function with a specific context
+greet.apply({ name: "John" }, ["John"]);
+
+```
+
+In this example, we are calling the  `greet`  function with a specific context object, which is an object that has a property called  `name`  set to  `"John"`. The  `greet`  function will log the message "Hello, John".
+
+## Bind Method
+
+The  `bind()`  method is used to create a new function that is bound to a specific context. This means that when we call this new function, it will have the same context as the original function.
+
+Here's an example of how we can use the  `bind()`  method:
+
+```javascript
+function greet(name) {
+  console.log(`Hello, ${name}`);
+}
+
+// Bind the `greet` function to a specific context
+const boundGreet = greet.bind({ name: "John" });
+
+// Call the bound `greet` function with no arguments
+boundGreet(); // logs "Hello, John"
+
+```
+
+In this example, we are binding the  `greet`  function to a specific context object, which is an object that has a property called  `name`  set to  `"John"`. When we call the bound  `greet`  function with no arguments, it will log the message "Hello, John".
+
+## Conclusion
+
+In this article, we have explained the differences between the  `call()`,  `apply()`, and  `bind()`methods in JavaScript. These methods are useful for invoking functions with different contexts and can be used to create new functions that are bound to specific contexts. By understanding these methods, you will be able to write more efficient and reusable code in your JavaScript applications.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## This in Object, Class and Array:
+**Classes:**
+
+-   Basic class definition with constructor and methods
+-   Static methods
+-   Class inheritance with `extends` and `super`
+-   Method overriding
+
+**Objects:**
+
+-   Object literals with methods
+-   Constructor functions (older approach)
+-   `Object.create()` for prototype-based objects
+-   The `this` keyword in different contexts
+
+**Arrays:**
+
+-   Basic array operations (push, pop, shift, unshift)
+-   Essential array methods like `map()`, `filter()`, `find()`, `reduce()`, `forEach()`
+-   Testing methods like `some()` and `every()`
+
+**Advanced concepts:**
+
+-   Combining classes with arrays (Library example)
+-   Destructuring assignment for both arrays and objects
+-   Spread operator for copying and combining
+
+The Library example at the end shows how these concepts work together in a real-world scenario, demonstrating how you might use classes to manage collections of objects stored in arrays.
+
+
+```javascript
+// ============= CLASSES =============
+
+// Basic class definition
+class Person {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  
+  // Method
+  greet() {
+    return `Hello, I'm ${this.name} and I'm ${this.age} years old`;
+  }
+  
+  // Static method
+  static isAdult(age) {
+    return age >= 18;
+  }
+}
+
+// Creating instances
+const person1 = new Person("Alice", 25);
+const person2 = new Person("Bob", 17);
+
+console.log(person1.greet()); // "Hello, I'm Alice and I'm 25 years old"
+console.log(Person.isAdult(person1.age)); // true
+console.log(Person.isAdult(person2.age)); // false
+
+// ============= CLASS INHERITANCE =============
+
+class Student extends Person {
+  constructor(name, age, grade) {
+    super(name, age); // Call parent constructor
+    this.grade = grade;
+  }
+  
+  study() {
+    return `${this.name} is studying in grade ${this.grade}`;
+  }
+  
+  // Override parent method
+  greet() {
+    return `${super.greet()} and I'm in grade ${this.grade}`;
+  }
+}
+
+const student = new Student("Charlie", 16, "10th");
+console.log(student.greet()); // "Hello, I'm Charlie and I'm 16 years old and I'm in grade 10th"
+console.log(student.study()); // "Charlie is studying in grade 10th"
+
+// ============= OBJECTS =============
+
+// Object literal
+const car = {
+  brand: "Toyota",
+  model: "Camry",
+  year: 2022,
+  
+  // Method
+  start() {
+    return `${this.brand} ${this.model} is starting`;
+  },
+  
+  // Method with parameters
+  drive(distance) {
+    return `Driving ${distance} miles in the ${this.brand}`;
+  }
+};
+
+console.log(car.start()); // "Toyota Camry is starting"
+console.log(car.drive(50)); // "Driving 50 miles in the Toyota"
+
+// Object constructor function (older approach)
+function Animal(name, species) {
+  this.name = name;
+  this.species = species;
+  this.makeSound = function() {
+    return `${this.name} the ${this.species} makes a sound`;
+  };
+}
+
+const dog = new Animal("Buddy", "Dog");
+console.log(dog.makeSound()); // "Buddy the Dog makes a sound"
+
+// Object.create()
+const vehiclePrototype = {
+  start() {
+    return `${this.type} is starting`;
+  }
+};
+
+const motorcycle = Object.create(vehiclePrototype);
+motorcycle.type = "Motorcycle";
+motorcycle.wheels = 2;
+console.log(motorcycle.start()); // "Motorcycle is starting"
+
+// ============= ARRAYS =============
+
+// Array creation and basic operations
+const fruits = ["apple", "banana", "orange"];
+const numbers = [1, 2, 3, 4, 5];
+
+// Adding elements
+fruits.push("grape"); // Add to end
+fruits.unshift("mango"); // Add to beginning
+console.log(fruits); // ["mango", "apple", "banana", "orange", "grape"]
+
+// Removing elements
+const lastFruit = fruits.pop(); // Remove from end
+const firstFruit = fruits.shift(); // Remove from beginning
+console.log(`Removed: ${lastFruit}, ${firstFruit}`); // "Removed: grape, mango"
+
+// ============= ARRAY METHODS =============
+
+const employees = [
+  { name: "John", department: "IT", salary: 60000 },
+  { name: "Sarah", department: "HR", salary: 55000 },
+  { name: "Mike", department: "IT", salary: 70000 },
+  { name: "Lisa", department: "Finance", salary: 65000 }
+];
+
+// map() - Transform each element
+const employeeNames = employees.map(emp => emp.name);
+console.log(employeeNames); // ["John", "Sarah", "Mike", "Lisa"]
+
+// filter() - Filter elements based on condition
+const itEmployees = employees.filter(emp => emp.department === "IT");
+console.log(itEmployees); // IT employees only
+
+// find() - Find first matching element
+const highEarner = employees.find(emp => emp.salary > 65000);
+console.log(highEarner); // { name: "Mike", department: "IT", salary: 70000 }
+
+// reduce() - Reduce array to single value
+const totalSalary = employees.reduce((sum, emp) => sum + emp.salary, 0);
+console.log(`Total salary: $${totalSalary}`); // "Total salary: $250000"
+
+// forEach() - Execute function for each element
+employees.forEach(emp => {
+  console.log(`${emp.name} works in ${emp.department}`);
+});
+
+// some() and every()
+const hasHighEarner = employees.some(emp => emp.salary > 65000);
+const allEarnMore50k = employees.every(emp => emp.salary > 50000);
+console.log(`Has high earner: ${hasHighEarner}`); // true
+console.log(`All earn more than 50k: ${allEarnMore50k}`); // true
+
+// ============= COMBINING CONCEPTS =============
+
+class Library {
+  constructor(name) {
+    this.name = name;
+    this.books = [];
+  }
+  
+  addBook(title, author, year) {
+    this.books.push({ title, author, year });
+  }
+  
+  findBooksByAuthor(author) {
+    return this.books.filter(book => book.author === author);
+  }
+  
+  getBookTitles() {
+    return this.books.map(book => book.title);
+  }
+  
+  getAverageYear() {
+    if (this.books.length === 0) return 0;
+    const totalYears = this.books.reduce((sum, book) => sum + book.year, 0);
+    return Math.round(totalYears / this.books.length);
+  }
+}
+
+// Using the Library class
+const myLibrary = new Library("City Library");
+myLibrary.addBook("1984", "George Orwell", 1949);
+myLibrary.addBook("Animal Farm", "George Orwell", 1945);
+myLibrary.addBook("To Kill a Mockingbird", "Harper Lee", 1960);
+
+console.log("All book titles:", myLibrary.getBookTitles());
+console.log("Books by George Orwell:", myLibrary.findBooksByAuthor("George Orwell"));
+console.log("Average publication year:", myLibrary.getAverageYear());
+
+// ============= ARRAY DESTRUCTURING =============
+
+const colors = ["red", "green", "blue", "yellow"];
+const [primary, secondary, ...otherColors] = colors;
+console.log(`Primary: ${primary}, Secondary: ${secondary}`); // "Primary: red, Secondary: green"
+console.log("Other colors:", otherColors); // ["blue", "yellow"]
+
+// ============= OBJECT DESTRUCTURING =============
+
+const user = { id: 1, username: "johndoe", email: "john@example.com", age: 30 };
+const { username, email, age = 25 } = user;
+console.log(`User: ${username}, Email: ${email}, Age: ${age}`);
+
+// ============= SPREAD OPERATOR =============
+
+const arr1 = [1, 2, 3];
+const arr2 = [4, 5, 6];
+const combined = [...arr1, ...arr2]; // [1, 2, 3, 4, 5, 6]
+
+const originalObject = { a: 1, b: 2 };
+const updatedObject = { ...originalObject, c: 3 }; // { a: 1, b: 2, c: 3 }
+
+```

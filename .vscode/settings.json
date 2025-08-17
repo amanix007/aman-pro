@@ -4,5 +4,11 @@
       "mode": "auto"
     }
   ],
+   "files.exclude": {
+    "project-archive": true
+  },
+  "search.exclude": {
+    "project-archive": true
+  },
   "kiroAgent.configureMCP": "Disabled"
 }

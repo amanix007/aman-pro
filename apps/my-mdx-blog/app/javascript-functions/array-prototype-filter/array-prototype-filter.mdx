@@ -1,0 +1,120 @@
+# Array.prototype.myFilter
+
+Creates a new array containing elements that pass a test function - identical to the built-in `filter()` method.
+
+## How It Works
+
+1. Creates an empty result array
+2. Iterates through each element
+3. Calls the test function on each element
+4. Adds elements that return truthy values
+5. Skips empty slots in sparse arrays
+6. Returns the filtered array
+
+## Implementation
+
+```javascript
+Array.prototype.myFilter = function(testFunction, context) {
+  // Validate inputs
+  if (this == null) {
+    throw new TypeError('myFilter called on null or undefined');
+  }
+  
+  if (typeof testFunction !== 'function') {
+    throw new TypeError(testFunction + ' is not a function');
+  }
+
+  // Setup variables
+  const originalArray = Object(this);
+  const arrayLength = originalArray.length >>> 0;
+  const filteredArray = [];
+
+  // Filter elements
+  for (let index = 0; index < arrayLength; index++) {
+    // Check if index exists (handles sparse arrays)
+    if (index in originalArray) {
+      const currentElement = originalArray[index];
+      
+      // Test element and add if it passes
+      if (testFunction.call(context, currentElement, index, originalArray)) {
+        filteredArray.push(currentElement);
+      }
+    }
+  }
+
+  return filteredArray;
+};
+const numbers = [1, 2, 3, 4, 5];
+const evenNumbers = numbers.myFilter(num => num % 2 === 0);
+console.log(evenNumbers); // [2, 4]
+
+// With context (thisArg)
+const config = { threshold: 3 };
+const filtered = numbers.myFilter(function(num) {
+  return num > this.threshold;
+}, config);
+console.log(filtered); // [4, 5]
+```
+
+
+
+
+
+The **`Array.prototype.filter()`** method lets you create a new array containing only the elements that satisfy a condition you provide.
+
+Its **main parameter** is a **callback function**, which runs once for each element in the array.
+
+----------
+
+### Syntax:
+
+`array.filter(callback(element, index, array), thisArg);` 
+
+### Parameters:
+
+1.  **`callback` (required)**  
+    A function that gets called for each element.  
+    It receives **three arguments**:
+    
+    -   `element` → the current element being processed
+        
+    -   `index` → the index of the current element
+        
+    -   `array` → the whole array being traversed
+        
+    
+    The callback should return:
+    
+    -   `true` → keep the element
+        
+    -   `false` → skip the element
+        
+    
+    Example:
+      ```javascript
+    `const numbers = [1, 2, 3, 4, 5]; const evens = numbers.filter(num => num % 2 === 0); console.log(evens); // [2, 4]` 
+    ```
+    
+2.  **`thisArg` (optional)**  
+    A value to use as `this` inside the callback.  
+    If not provided, `undefined` is used.
+    
+    Example:
+      ```javascript    
+    const obj = { min: 3 }; 
+    const numbers = [1, 2, 3, 4, 5]; 
+    const filtered = numbers.filter(function(num) { 
+    return num >= this.min;
+    }, obj); console.log(filtered); // [3, 4, 5]` 
+    ```    
+
+----------
+
+👉 So in short:
+
+-   **First parameter (callback):** decides which items pass the filter.
+    
+-   **Second parameter (thisArg):** lets you bind `this` inside the callback.
+
+
+
