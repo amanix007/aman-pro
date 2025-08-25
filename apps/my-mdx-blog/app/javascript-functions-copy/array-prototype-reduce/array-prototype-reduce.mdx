@@ -1,0 +1,155 @@
+# Array.prototype.myReduce Implementation
+
+## Problem Statement
+
+Implement `Array.prototype.reduce` as `Array.prototype.myReduce` to avoid overwriting the native method. The reduce method executes a reducer function on each element of the array, resulting in a single output value.
+
+## Understanding Array.prototype.reduce
+
+The reduce method takes a callback function (reducer) and an optional initial value. The reducer function receives four arguments:
+- `accumulator`: The accumulated value previously returned in the last invocation of the callback
+- `currentValue`: The current element being processed in the array
+- `currentIndex`: The index of the current element being processed
+- `array`: The array reduce was called upon
+
+## Solution
+
+```javascript
+Array.prototype.myReduce = function(callback, initialValue) {
+    // Check if callback is a function
+    if (typeof callback !== 'function') {
+        throw new TypeError('Callback must be a function');
+    }
+    
+    // Handle empty array case
+    if (this.length === 0 && arguments.length < 2) {
+        throw new TypeError('Reduce of empty array with no initial value');
+    }
+    
+    let accumulator;
+    let startIndex;
+    
+    // Determine starting conditions based on whether initialValue is provided
+    if (arguments.length >= 2) {
+        // Initial value is provided
+        accumulator = initialValue;
+        startIndex = 0;
+    } else {
+        // No initial value provided, use first element as accumulator
+        accumulator = this[0];
+        startIndex = 1;
+    }
+    
+    // Iterate through the array starting from startIndex
+    for (let i = startIndex; i < this.length; i++) {
+        // Skip holes in sparse arrays (elements that don't exist)
+        if (i in this) {
+            accumulator = callback(accumulator, this[i], i, this);
+        }
+    }
+    
+    return accumulator;
+};
+```
+
+## Key Implementation Details
+
+### 1. Parameter Validation
+- Check if the callback is actually a function
+- Throw TypeError if not a function (matches native behavior)
+
+### 2. Empty Array Handling
+- If array is empty and no initial value is provided, throw TypeError
+- This matches the native reduce behavior
+
+### 3. Initial Value Logic
+- Use `arguments.length` to check if initial value was provided
+- If provided: start from index 0 with the initial value as accumulator
+- If not provided: use first element as accumulator, start from index 1
+
+### 4. Sparse Array Support
+- Use `i in this` to check if property exists at index i
+- Skip holes in sparse arrays (undefined elements that don't actually exist)
+
+### 5. Callback Invocation
+- Call callback with correct parameters: `(accumulator, currentValue, currentIndex, array)`
+- Update accumulator with callback result
+
+## Example Usage
+
+```javascript
+// Basic sum example
+const numbers = [1, 2, 3, 4, 5];
+const sum = numbers.myReduce((acc, curr) => acc + curr, 0);
+console.log(sum); // 15
+
+// Without initial value
+const product = numbers.myReduce((acc, curr) => acc * curr);
+console.log(product); // 120
+
+// Object transformation
+const items = ['apple', 'banana', 'cherry'];
+const itemCount = items.myReduce((acc, item, index) => {
+    acc[item] = index;
+    return acc;
+}, {});
+console.log(itemCount); // { apple: 0, banana: 1, cherry: 2 }
+
+// Flattening arrays
+const nested = [[1, 2], [3, 4], [5, 6]];
+const flattened = nested.myReduce((acc, curr) => acc.concat(curr), []);
+console.log(flattened); // [1, 2, 3, 4, 5, 6]
+```
+
+## Edge Cases to Consider
+
+### Empty Arrays
+```javascript
+// This should throw an error
+try {
+    [].myReduce((a, b) => a + b);
+} catch (e) {
+    console.log(e.message); // "Reduce of empty array with no initial value"
+}
+
+// This should work fine
+const result = [].myReduce((a, b) => a + b, 0);
+console.log(result); // 0
+```
+
+### Sparse Arrays
+```javascript
+const sparse = [1, , , 4, 5]; // Array with holes
+const sum = sparse.myReduce((acc, curr) => acc + curr, 0);
+console.log(sum); // 10 (skips the undefined elements)
+```
+
+### Single Element Arrays
+```javascript
+const single = [42];
+console.log(single.myReduce((a, b) => a + b)); // 42 (no callback execution)
+console.log(single.myReduce((a, b) => a + b, 10)); // 52 (callback executes once)
+```
+
+## Time and Space Complexity
+
+- **Time Complexity**: O(n) where n is the length of the array
+- **Space Complexity**: O(1) excluding the space used by the callback function
+
+## Interview Tips
+
+1. **Start with the basic structure** - Define the function signature and basic loop
+2. **Handle edge cases incrementally** - Add error checking, empty array handling, etc.
+3. **Explain your reasoning** - Walk through why you check `arguments.length` vs checking `initialValue !== undefined`
+4. **Test with examples** - Show how it works with different scenarios
+5. **Discuss the native behavior** - Explain how your implementation matches the native reduce
+
+## Common Mistakes to Avoid
+
+1. Not handling the case where no initial value is provided
+2. Not properly handling sparse arrays (holes)
+3. Not throwing appropriate errors for edge cases
+4. Starting iteration from wrong index when no initial value is provided
+5. Not checking if callback is actually a function
+
+This implementation provides a faithful recreation of the native `Array.prototype.reduce` method while maintaining all its key behaviors and edge case handling.

@@ -18,6 +18,12 @@ export const RouteData: RouteItem[] = [
         description: 'Create UI that is shared across routes',
       },
    
+      {
+        name: 'array-prototype-reduce',
+        slug: 'javascript-functions/array-prototype-reduce',
+        description: 'Create UI that is shared across routes',
+      },
+   
       
     ],
   },

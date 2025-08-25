@@ -1,0 +1,393 @@
+# Lodash Get Function Implementation
+
+## Problem Statement
+
+Implement Lodash's `get` function from scratch. The `get` function safely retrieves a value from a nested object using a path string or array, returning a default value if the path doesn't exist or resolves to `undefined`.
+
+## Understanding Lodash.get
+
+The `get` function signature is:
+```javascript
+_.get(object, path, [defaultValue])
+```
+
+- `object`: The object to query
+- `path`: The path of the property to get (string or array)
+- `defaultValue`: The value returned for `undefined` resolved values (optional)
+
+## Solution
+
+```javascript
+function get(object, path, defaultValue) {
+    // Handle null/undefined object
+    if (object == null) {
+        return defaultValue;
+    }
+    
+    // Convert path to array if it's a string
+    const pathArray = Array.isArray(path) ? path : stringToPath(path);
+    
+    // Traverse the object following the path
+    let current = object;
+    
+    for (let i = 0; i < pathArray.length; i++) {
+        const key = pathArray[i];
+        
+        // Check if current is null/undefined or if key doesn't exist
+        if (current == null || !(key in current)) {
+            return defaultValue;
+        }
+        
+        current = current[key];
+    }
+    
+    // Return the found value or defaultValue if the result is undefined
+    return current === undefined ? defaultValue : current;
+}
+
+// Helper function to convert string path to array
+function stringToPath(path) {
+    // Handle empty string
+    if (!path) return [];
+    
+    // Convert string path to array of keys
+    // This regex handles:
+    // - Dot notation: 'a.b.c' -> ['a', 'b', 'c']
+    // - Bracket notation: 'a[0].b[1]' -> ['a', '0', 'b', '1']
+    // - Mixed notation: 'a[0].b.c[1]' -> ['a', '0', 'b', 'c', '1']
+    const result = [];
+    
+    // Replace brackets with dots and split, then clean up
+    const cleanPath = path
+        .replace(/\[(\w+)\]/g, '.$1') // Convert [key] to .key
+        .replace(/^\./, ''); // Remove leading dot
+    
+    // Split by dots and filter out empty strings
+    return cleanPath.split('.').filter(key => key !== '');
+}
+
+// Alternative more robust stringToPath implementation
+function stringToPathRobust(path) {
+    if (!path) return [];
+    
+    const result = [];
+    let current = '';
+    let inBrackets = false;
+    let inQuotes = false;
+    let quoteChar = '';
+    
+    for (let i = 0; i < path.length; i++) {
+        const char = path[i];
+        
+        if (!inQuotes && (char === '"' || char === "'")) {
+            inQuotes = true;
+            quoteChar = char;
+        } else if (inQuotes && char === quoteChar) {
+            inQuotes = false;
+            quoteChar = '';
+        } else if (!inQuotes && char === '[') {
+            if (current) {
+                result.push(current);
+                current = '';
+            }
+            inBrackets = true;
+        } else if (!inQuotes && char === ']') {
+            if (current) {
+                result.push(current);
+                current = '';
+            }
+            inBrackets = false;
+        } else if (!inQuotes && char === '.' && !inBrackets) {
+            if (current) {
+                result.push(current);
+                current = '';
+            }
+        } else {
+            current += char;
+        }
+    }
+    
+    if (current) {
+        result.push(current);
+    }
+    
+    return result;
+}
+```
+
+## Key Implementation Details
+
+### 1. Null/Undefined Object Handling
+- Check if the object is `null` or `undefined` at the start
+- Return default value immediately if so
+
+### 2. Path Normalization
+- Accept both string and array paths
+- Convert string paths to arrays using helper function
+- Handle various path formats (dot notation, bracket notation, mixed)
+
+### 3. Safe Traversal
+- Use `in` operator to check property existence
+- Handle intermediate `null`/`undefined` values
+- Stop traversal early if path becomes invalid
+
+### 4. Default Value Handling
+- Return default value if path doesn't exist
+- Return default value if final result is `undefined`
+- Distinguish between `undefined` and other falsy values
+
+## Example Usage
+
+```javascript
+const object = {
+    user: {
+        name: 'John',
+        details: {
+            age: 30,
+            hobbies: ['reading', 'gaming'],
+            address: {
+                street: '123 Main St',
+                city: 'Boston'
+            }
+        }
+    },
+    scores: [100, 85, 92],
+    'special-key': 'special value'
+};
+
+// Basic nested access
+console.log(get(object, 'user.name')); // 'John'
+console.log(get(object, 'user.details.age')); // 30
+
+// Array access with dot notation
+console.log(get(object, 'user.details.hobbies.0')); // 'reading'
+console.log(get(object, 'scores.1')); // 85
+
+// Bracket notation
+console.log(get(object, 'user[details][age]')); // 30
+console.log(get(object, 'scores[0]')); // 100
+
+// Mixed notation
+console.log(get(object, 'user.details.hobbies[1]')); // 'gaming'
+
+// Array paths
+console.log(get(object, ['user', 'name'])); // 'John'
+console.log(get(object, ['user', 'details', 'hobbies', 0])); // 'reading'
+
+// Special characters in keys
+console.log(get(object, 'special-key')); // 'special value'
+
+// Non-existent paths with default values
+console.log(get(object, 'user.email', 'N/A')); // 'N/A'
+console.log(get(object, 'user.details.phone', 'No phone')); // 'No phone'
+
+// Deep non-existent paths
+console.log(get(object, 'user.settings.theme.color', 'blue')); // 'blue'
+```
+
+## Edge Cases to Consider
+
+### Null/Undefined Objects
+```javascript
+console.log(get(null, 'any.path', 'default')); // 'default'
+console.log(get(undefined, 'any.path', 'default')); // 'default'
+console.log(get({}, 'nonexistent', 'default')); // 'default'
+```
+
+### Empty Paths
+```javascript
+console.log(get({ a: 1 }, '', 'default')); // { a: 1 } (returns the object itself)
+console.log(get({ a: 1 }, [], 'default')); // { a: 1 }
+```
+
+### Undefined vs Null Values
+```javascript
+const obj = {
+    a: null,
+    b: undefined,
+    c: 0,
+    d: false,
+    e: ''
+};
+
+console.log(get(obj, 'a', 'default')); // null (not default!)
+console.log(get(obj, 'b', 'default')); // 'default' (undefined gets replaced)
+console.log(get(obj, 'c', 'default')); // 0
+console.log(get(obj, 'd', 'default')); // false
+console.log(get(obj, 'e', 'default')); // ''
+```
+
+### Array Indices as Strings
+```javascript
+const arr = ['a', 'b', 'c'];
+console.log(get(arr, '1')); // 'b'
+console.log(get(arr, 1)); // 'b'
+console.log(get({ arr }, 'arr.1')); // 'b'
+```
+
+### Complex Nested Structures
+```javascript
+const complex = {
+    'a.b': {
+        'c[0]': {
+            'd.e': 'found'
+        }
+    }
+};
+
+// This won't work as expected due to special characters in keys
+console.log(get(complex, 'a.b.c[0].d.e')); // undefined
+
+// Need to use array notation for keys with special characters
+console.log(get(complex, ['a.b', 'c[0]', 'd.e'])); // 'found'
+```
+
+## Advanced Implementation with Better Path Parsing
+
+```javascript
+// More robust implementation that handles edge cases better
+function getLodashStyle(object, path, defaultValue) {
+    if (object == null) {
+        return defaultValue;
+    }
+    
+    // Normalize path
+    const keys = Array.isArray(path) ? [...path] : toPath(path);
+    
+    if (keys.length === 0) {
+        return object;
+    }
+    
+    let result = object;
+    
+    for (const key of keys) {
+        if (result == null) {
+            return defaultValue;
+        }
+        
+        result = result[key];
+    }
+    
+    return result === undefined ? defaultValue : result;
+}
+
+// Comprehensive path parser that matches Lodash behavior
+function toPath(value) {
+    if (Array.isArray(value)) {
+        return value;
+    }
+    
+    if (typeof value !== 'string') {
+        return [value];
+    }
+    
+    const result = [];
+    const chars = value.split('');
+    let current = '';
+    let inBracket = false;
+    let inQuote = false;
+    let quoteChar = '';
+    
+    for (let i = 0; i < chars.length; i++) {
+        const char = chars[i];
+        const nextChar = chars[i + 1];
+        
+        if (!inQuote && !inBracket && char === '.') {
+            if (current) {
+                result.push(current);
+                current = '';
+            }
+        } else if (!inQuote && char === '[') {
+            if (current) {
+                result.push(current);
+                current = '';
+            }
+            inBracket = true;
+        } else if (!inQuote && char === ']') {
+            if (current) {
+                result.push(isNumeric(current) ? Number(current) : current);
+                current = '';
+            }
+            inBracket = false;
+        } else if (!inQuote && (char === '"' || char === "'")) {
+            inQuote = true;
+            quoteChar = char;
+        } else if (inQuote && char === quoteChar) {
+            inQuote = false;
+            quoteChar = '';
+        } else {
+            current += char;
+        }
+    }
+    
+    if (current) {
+        result.push(inBracket && isNumeric(current) ? Number(current) : current);
+    }
+    
+    return result;
+}
+
+// Helper to check if string represents a number
+function isNumeric(str) {
+    return !isNaN(str) && !isNaN(parseFloat(str));
+}
+```
+
+## Time and Space Complexity
+
+- **Time Complexity**: O(n) where n is the length of the path
+- **Space Complexity**: O(m) where m is the length of the path array (for path normalization)
+
+## Interview Tips
+
+1. **Start simple** - Implement basic object traversal first
+2. **Handle edge cases incrementally** - Add null checks, path parsing, etc.
+3. **Discuss path formats** - Explain different ways paths can be represented
+4. **Show understanding of JavaScript quirks** - `undefined` vs `null`, property existence checking
+5. **Test with examples** - Walk through various scenarios
+6. **Mention performance considerations** - Path parsing overhead, early termination
+
+## Common Mistakes to Avoid
+
+1. Not handling `null`/`undefined` objects at the start
+2. Confusing `undefined` with other falsy values
+3. Not properly parsing bracket notation in paths
+4. Using `obj.hasOwnProperty()` instead of `in` operator (misses inherited properties)
+5. Not handling array indices correctly
+6. Forgetting to handle empty paths
+7. Not distinguishing between property doesn't exist vs property is `undefined`
+
+## Production Considerations
+
+```javascript
+// Add input validation for production use
+function getProduction(object, path, defaultValue) {
+    // Type checking
+    if (typeof path !== 'string' && !Array.isArray(path)) {
+        throw new TypeError('Path must be a string or array');
+    }
+    
+    // ... rest of implementation
+}
+
+// Consider memoizing path parsing for performance
+const pathCache = new Map();
+
+function getWithCaching(object, path, defaultValue) {
+    if (object == null) {
+        return defaultValue;
+    }
+    
+    const pathKey = Array.isArray(path) ? path.join('.') : path;
+    let keys = pathCache.get(pathKey);
+    
+    if (!keys) {
+        keys = Array.isArray(path) ? path : toPath(path);
+        pathCache.set(pathKey, keys);
+    }
+    
+    // ... rest of implementation
+}
+```
+
+This implementation provides a comprehensive recreation of Lodash's `get` function with proper edge case handling, path parsing, and performance considerations.

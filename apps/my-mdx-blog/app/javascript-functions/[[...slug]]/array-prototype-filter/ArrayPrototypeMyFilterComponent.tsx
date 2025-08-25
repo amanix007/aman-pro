@@ -1,4 +1,27 @@
-export default function ArrayPrototypeMyFilter() {
+
+import ArrayPrototypeFilter from './ArrayPrototypeMyFilterDocumentation.mdx';
+
+declare global {
+  interface Array<T> {
+    myFilter(
+      callback: (value: T, index: number, array: T[]) => boolean,
+      callBackContext?: unknown
+    ): T[];
+  }
+}
+
+
+export default function ArrayPrototypeMyFilterComponent() {
+  ArrayPrototypeMyFilter();
+
+  return (
+    <div>
+      <ArrayPrototypeFilter
+      />
+    </div>
+  )
+}
+function ArrayPrototypeMyFilter() {
   Array.prototype.myFilter = function (passedLogicCheck, callBackContext) {
     // TODO: Add TS support in all the functions
     if (this == null) {
@@ -29,11 +52,11 @@ export default function ArrayPrototypeMyFilter() {
     }
     return resultArray;
   };
-  const numbers = [1, 2, 3, 4, 5, 7];
+  const numbers : number[] = [1, 2, 3, 4, 5, 7];
   const passed_context = {
     max: 4,
   };
-  const filteredData = numbers.myFilter(function (currentElement, index) {
+  const filteredData = numbers.myFilter(function (this: { max: number }, currentElement, index) {
     if (currentElement > this.max) {
       console.log("index:", index, "number:", numbers[index]);
       return true;
