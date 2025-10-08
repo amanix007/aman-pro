@@ -391,3 +391,127 @@ function getWithCaching(object, path, defaultValue) {
 ```
 
 This implementation provides a comprehensive recreation of Lodash's `get` function with proper edge case handling, path parsing, and performance considerations.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 1. **Function Signature**
+
+`export  default  function get<T>( objectParam: Record<string, any>, pathParam: string | Array<string | number>,
+  defaultValue?: T,
+): T | undefined` 
+
+-   **Generic `<T>`** → caller decides (or TS infers) the type you expect back.
+    
+-   `objectParam: Record<string, any>` → any object is allowed.
+    
+-   `pathParam: string | Array<string | number>` → you can pass `"a.b.c"` or `["a","b","c"]`.
+    
+-   `defaultValue?: T` → optional fallback.
+    
+-   **Return type:** `T | undefined` → either the found value, or undefined/default.
+    
+
+----------
+
+### 2. **Normalize `pathParam`**
+
+`const path = Array.isArray(pathParam) ? pathParam : pathParam.split('.');` 
+
+-   If path is already an array → keep it.
+    
+-   If it’s a dot-separated string → split into array (`"a.b.c"` → `["a","b","c"]`).  
+    ➡️ This way, you can process both formats the same.
+    
+
+----------
+
+### 3. **Initialize traversal variables**
+
+`let index = 0; let length = path.length; let  object = objectParam;` 
+
+-   `index` tracks current step in the path.
+    
+-   `length` is total number of keys in the path.
+    
+-   `object` is the “current level” of the object while traversing.
+    
+
+----------
+
+### 4. **Traverse the object step by step**
+
+`while (object != null && index < length) { object = object[String(path[index++])];
+}` 
+
+-   `object != null` → safe guard (handles both `null` and `undefined`).
+    
+-   `object[String(path[index++])]` → access next property by converting key to string (so `0` also works as an array index).
+    
+-   Loop continues until:
+    
+    -   Reached end of path, or
+        
+    -   Object becomes `null`/`undefined`.
+        
+
+Example:
+
+`const obj = { a: { b: { c: 10 } } };
+path = ["a","b","c"]; // step 1: object = obj["a"] → { b: { c: 10 } }  // step 2: object = obj["b"] → { c: 10 }  // step 3: object = obj["c"] → 10` 
+
+----------
+
+### 5. **Check if traversal was complete**
+
+`const value = index && index === length ? object : undefined;` 
+
+-   Ensures we **fully reached the end** of the path.
+    
+-   If we stopped early (e.g., a missing property), set `value = undefined`.
+    
+
+----------
+
+### 6. **Return value or default**
+
+`return (value !== undefined ? value : defaultValue) as T;` 
+
+-   If a real value was found, return it.
+    
+-   If `value` is `undefined`, return `defaultValue`.
+    
+-   The `as T` cast ensures TypeScript treats it as type `T`.
+    
+
+----------
+
+### ✅ Example Usage
+
+`const obj = { user: { profile: { name: "Aman" } } };
+
+get<string>(obj, "user.profile.name"); // "Aman" get<number>(obj, "user.profile.age", 0); // 0 (default)  get(obj, ["user", "profile", "name"]); // "Aman"  get(obj, "user.profile.nonexistent", "guest"); // "guest"` 
+
+----------
+
+### 🚀 Why this solution is good
+
+-   Handles **both string and array paths**.
+    
+-   Works with **nested objects & arrays**.
+    
+-   Returns a **default value** safely.
+    
+-   Generic `<T>` makes it **strongly typed**.
+    
+-   Inspired by **Lodash’s `get`**, but lightweight.
